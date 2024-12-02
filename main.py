@@ -3,8 +3,11 @@ import logging
 import math
 import asyncio
 import traceback
+import os
 from telethon import TelegramClient, events
 from pybit.unified_trading import HTTP
+from flask import Flask, request, jsonify
+from threading import Thread
 
 # Logging configuration
 logging.basicConfig(
@@ -20,14 +23,28 @@ api_secret=config.api_secret
 # Telegram API credentials
 api_id=config.api_id
 api_hash=config.api_hash
-bot_username=config.bot_username
-
-# Initialize the Telegram client
-client = TelegramClient('my_session', api_id, api_hash)
+bot_username=config.bot_username  # Keep the bot username for listening to bot messages
+phone_number=config.phone_number  # Using a single phone number for account
+session_file='my_session.session'  # Session file name
 
 # Initialize Bybit session
 session = HTTP(api_key=api_key, api_secret=api_secret, testnet=False, demo=True)
 
+# OTP storage
+otp_data = None  # Single OTP data for login
+
+# Flask application for receiving OTP via POST request
+app = Flask(__name__)
+
+@app.route('/receive_otp', methods=['POST'])
+def receive_otp():
+    global otp_data
+    data = request.json
+    otp = data.get('otp')
+    
+    # Store the OTP data for login
+    otp_data = otp
+    return jsonify({"status": "OTP received"}), 200
 
 def get_step_size(symbol):
     """Fetch the step size for the given symbol."""
@@ -43,7 +60,6 @@ def get_step_size(symbol):
     except Exception:
         logging.error("Error fetching step size: %s", traceback.format_exc())
         raise
-
 
 async def handle_bot_response(event):
     """Handles bot response to extract trading parameters and place an order."""
@@ -136,19 +152,61 @@ async def handle_bot_response(event):
         logging.error("Error handling bot response: %s", traceback.format_exc())
         print(f"Error handling bot response: {traceback.format_exc()}")
 
-
 @client.on(events.NewMessage(from_users=bot_username))
 async def bot_message_handler(event):
     print(f"Bot response received: {event.raw_text}")
     await handle_bot_response(event)
 
+async def login_with_phone(client, phone_number):
+    # Check if session file exists; if not, create a new one
+    if not os.path.exists(session_file):
+        print("Session file not found. Creating a new session...")
+        await client.start(phone_number)  # Start the client, creating a new session
+    else:
+        await client.connect()
+        if not await client.is_user_authorized():
+            print(f"Logging in with phone number: {phone_number}")
+            await client.send_code_request(phone_number)
+            
+            # Indicate when to enter OTP
+            print(f"Enter OTP for the account:")
+
+            # Wait for OTP to be received via Postman
+            while otp_data is None:
+                await asyncio.sleep(1)  # Wait for the OTP to be posted
+
+            otp = otp_data
+            if otp:
+                await client.sign_in(phone_number, otp)
+                print("Logged in successfully!")
+            else:
+                print("Failed to receive OTP.")
+                raise Exception("OTP not received")
 
 async def main():
     print("Starting Telegram client...")
+
+    # Log in to the Telegram client using the phone number
+    await login_with_phone(client, phone_number)
+
+    # Start the client
     await client.start()
     print("Telegram client started. Listening for bot messages...")
     await client.run_until_disconnected()
 
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Start the Flask server in a separate thread for OTP reception
+    def run_flask():
+        app.run(host="0.0.0.0", port=5000)
+
+    flask_thread = Thread(target=run_flask)
+    flask_thread.start()
+
+    # Run the main function in a loop to handle restarts on failure
+    while True:
+        try:
+            asyncio.run(main())
+        except Exception as e:
+            logging.error(f"Error occurred: {e}. Restarting the bot...")
+            print(f"Error occurred: {e}. Restarting the bot...")
+            asyncio.sleep(5)  # Optional: sleep for a while before restarting
