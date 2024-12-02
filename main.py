@@ -197,19 +197,22 @@ async def main():
     print("Telegram client started. Listening for bot messages...")
     await client.run_until_disconnected()
 
-if __name__ == "__main__":
-    # Start the Flask server in a separate thread for OTP reception
-    def run_flask():
-        app.run(host="0.0.0.0", port=5000)
+# Start the Flask server in a separate thread for OTP reception
+def run_flask():
+    app.run(host="0.0.0.0", port=5000)
 
-    flask_thread = Thread(target=run_flask)
-    flask_thread.start()
+flask_thread = Thread(target=run_flask)
+flask_thread.start()
 
-    # Run the main function in a loop to handle restarts on failure
+# Run the main function in a loop to handle restarts on failure
+async def run():
     while True:
         try:
-            asyncio.run(main())
+            await main()
         except Exception as e:
             logging.error(f"Error occurred: {e}. Restarting the bot...")
             print(f"Error occurred: {e}. Restarting the bot...")
-            await asyncio.sleep(5)  # Correct sleep usage in async functions
+            await asyncio.sleep(5)  # Optional: sleep for a while before restarting
+
+if __name__ == "__main__":
+    asyncio.run(run())
