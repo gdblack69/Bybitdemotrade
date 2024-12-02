@@ -152,6 +152,9 @@ async def handle_bot_response(event):
         logging.error("Error handling bot response: %s", traceback.format_exc())
         print(f"Error handling bot response: {traceback.format_exc()}")
 
+# Initialize the Telegram client
+client = TelegramClient(session_file, api_id, api_hash)
+
 @client.on(events.NewMessage(from_users=bot_username))
 async def bot_message_handler(event):
     print(f"Bot response received: {event.raw_text}")
