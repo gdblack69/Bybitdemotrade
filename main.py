@@ -17,15 +17,15 @@ logging.basicConfig(
 )
 
 # Bybit API credentials
-api_key=config.api_key
-api_secret=config.api_secret
+api_key = config.api_key
+api_secret = config.api_secret
 
 # Telegram API credentials
-api_id=config.api_id
-api_hash=config.api_hash
-bot_username=config.bot_username  # Keep the bot username for listening to bot messages
-phone_number=config.phone_number  # Using a single phone number for account
-session_file='my_session.session'  # Session file name
+api_id = config.api_id
+api_hash = config.api_hash
+bot_username = config.bot_username  # Keep the bot username for listening to bot messages
+phone_number = config.phone_number  # Using a single phone number for account
+session_file = 'my_session.session'  # Session file name
 
 # Initialize Bybit session
 session = HTTP(api_key=api_key, api_secret=api_secret, testnet=False, demo=True)
