@@ -212,4 +212,4 @@ if __name__ == "__main__":
         except Exception as e:
             logging.error(f"Error occurred: {e}. Restarting the bot...")
             print(f"Error occurred: {e}. Restarting the bot...")
-            asyncio.sleep(5)  # Optional: sleep for a while before restarting
+            await asyncio.sleep(5)  # Correct sleep usage in async functions
