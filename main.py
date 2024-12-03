@@ -35,6 +35,10 @@ otp_data = None
 # Flask application for receiving OTP via POST request
 app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return jsonify({"status": "Bot is running"}), 200
+
 @app.route('/receive_otp', methods=['POST'])
 def receive_otp():
     global otp_data
