@@ -1,4 +1,3 @@
-import config
 import logging
 import math
 import asyncio
@@ -7,24 +6,25 @@ from telethon import TelegramClient, events
 from pybit.unified_trading import HTTP
 from flask import Flask, request, jsonify
 from threading import Thread
+import traceback  # For detailed error handling
 
 # Logging configuration
 logging.basicConfig(
-    filename='pybit_telegram.log',
+    filename="pybit_telegram.log",
     level=logging.DEBUG,
-    format='%(asctime)s %(levelname)s %(message)s'
+    format="%(asctime)s %(levelname)s %(message)s"
 )
 
-# Bybit API credentials
-api_key = config.api_key
-api_secret = config.api_secret
+# Bybit API credentials from environment variables
+api_key = os.getenv("BYBIT_API_KEY")
+api_secret = os.getenv("BYBIT_API_SECRET")
 
-# Telegram API credentials
-api_id = config.api_id
-api_hash = config.api_hash
-bot_username = config.bot_username
-phone_number = config.phone_number
-session_file = 'my_session.session'
+# Telegram API credentials from environment variables
+api_id = int(os.getenv("TELEGRAM_API_ID", 0))  # Default to 0 if not set
+api_hash = os.getenv("TELEGRAM_API_HASH")
+bot_username = os.getenv("TELEGRAM_BOT_USERNAME")
+phone_number = os.getenv("TELEGRAM_PHONE_NUMBER")
+session_file = "my_session.session"  # Adjust session file name if needed
 
 # Initialize Bybit session
 session = HTTP(api_key=api_key, api_secret=api_secret, testnet=False, demo=True)
@@ -43,8 +43,8 @@ def home():
 def receive_otp():
     global otp_data
     data = request.json
-    otp = data.get('otp')
-    
+    otp = data.get("otp")
+
     otp_data = otp
     return jsonify({"status": "OTP received"}), 200
 
