@@ -20,10 +20,10 @@ api_key = os.getenv("BYBIT_API_KEY")
 api_secret = os.getenv("BYBIT_API_SECRET")
 
 # Telegram API credentials from environment variables
-api_id = int(os.getenv("TELEGRAM_API_ID", 0))  # Default to 0 if not set
-api_hash = os.getenv("TELEGRAM_API_HASH")
-bot_username = os.getenv("TELEGRAM_BOT_USERNAME")
-phone_number = os.getenv("TELEGRAM_PHONE_NUMBER")
+api_id = int(os.getenv("API_ID", 0))  # Default to 0 if not set
+api_hash = os.getenv("API_HASH")
+bot_username = os.getenv("BOT_USERNAME")
+phone_number = os.getenv("PHONE_NUMBER")
 session_file = "my_session.session"  # Adjust session file name if needed
 
 # Initialize Bybit session
