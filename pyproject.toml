@@ -5,7 +5,6 @@ description = "A Telegram bot"
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-python = "3.12.7"
 telethon = "1.28.0"
 python-telegram-bot = "20.0"
 requests = "2.31.0"
