@@ -8,7 +8,7 @@ authors = ["Your Name <you@example.com>"]
 telethon = "1.28.0"
 python-telegram-bot = "20.0"
 requests = "2.31.0"
-Flask = "2.3.2"
+Flask = "2.3.8"
 pybit = "^5.8.0" 
 
 [build-system]
